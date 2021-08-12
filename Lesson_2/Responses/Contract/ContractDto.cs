@@ -1,6 +1,8 @@
-﻿namespace Lesson_2.Models
+﻿using Lesson_2.Models;
+
+namespace Lesson_2.Responses
 {
-    public class Contract
+    public class ContractDto
     {
         public long Id { get; set; }
         public Job Job { get; set; }

@@ -1,43 +1,38 @@
 ﻿using System.Collections.Generic;
 using Lesson_2.Models;
+using Lesson_2.Requests;
 
 namespace Lesson_2.Repositories
 {
     public interface IEmployeeRepository
     {
-        void CreateEmployee(long _employeeId);
-        void DeleteEmployee(long _employeeId);
+        void CreateEmployee(CreateEmployeeRequest request);
+        void DeleteEmployee(DeleteEmployeeRequest request);
         List<Employee> GetAllEmployees();
+        Employee GetEmployeeById(GetEmployeeByIdRequest request);
     }
     public class EmployeeRepository : IEmployeeRepository
     {
-        List<Employee> employees;
+        IDataRepository _data;
 
-        public EmployeeRepository()
+        public EmployeeRepository(IDataRepository data)
         {
-            employees = new List<Employee>();
+            _data = data;
         }
 
-        public void CreateEmployee(long _employeeId)
+        public void CreateEmployee(CreateEmployeeRequest request)
         {
-            foreach (Employee item in employees)
-            {
-                if (item.employeeId == _employeeId)
-                {
-                    return;
-                }
-            }
-
-            employees.Add(new Employee { employeeId = _employeeId });
+            _data.employeeCounter++;
+            _data.employees.Add(new Employee { Id = _data.employeeCounter, Name = request.Name });
         }
 
-        public void DeleteEmployee(long _employeeId)
+        public void DeleteEmployee(DeleteEmployeeRequest request)
         {
-            foreach (Employee item in employees)
+            foreach (Employee item in _data.employees)
             {
-                if (item.employeeId == _employeeId)
+                if (item.Id == request.Id)
                 {
-                    employees.Remove(item);
+                    _data.employees.Remove(item);
                     break;
                 }
             }
@@ -45,7 +40,20 @@ namespace Lesson_2.Repositories
 
         public List<Employee> GetAllEmployees()
         {
-            return employees;
+            return _data.employees;
+        }
+
+        public Employee GetEmployeeById(GetEmployeeByIdRequest request)
+        {
+            foreach (Employee employee in _data.employees)
+            {
+                if(employee.Id == request.Id)
+                {
+                    return employee;
+                }
+            }
+
+            return null;
         }
     }
 }

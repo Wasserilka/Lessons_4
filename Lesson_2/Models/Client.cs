@@ -1,8 +1,10 @@
-﻿namespace Lesson_2.Models
+﻿using System.Collections.Generic;
+
+namespace Lesson_2.Models
 {
     public class Client
     {
-        public long clientId { get; set; }  
-        public long invoice { get; set; }
+        public long Id { get; set; }  
+        public string Name { get; set; }
     }
 }
