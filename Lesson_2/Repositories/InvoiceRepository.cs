@@ -1,44 +1,58 @@
 ﻿using System.Collections.Generic;
 using Lesson_2.Models;
+using Lesson_2.Requests;
 
 namespace Lesson_2.Repositories
 {
     public interface IInvoiceRepository
     {
-        void CreateInvoice(long _invoiceId);
-        void DeleteInvoice(long _invoiceId);
-        void PutContractToInvoice(long _invoiceId, long _contractId);
+        void CreateInvoice(CreateInvoiceRequest request);
+        void DeleteInvoice(DeleteInvoiceRequest request);
         List<Invoice> GetAllInvoices();
+        Invoice GetInvoiceById(GetInvoiceByIdRequest request);
     }
     public class InvoiceRepository : IInvoiceRepository
     {
-        List<Invoice> invoices;
+        IDataRepository _data;
 
-        public InvoiceRepository()
+        public InvoiceRepository(IDataRepository data)
         {
-            invoices = new List<Invoice>();
+            _data = data;
         }
 
-        public void CreateInvoice(long _invoiceId)
+        public void CreateInvoice(CreateInvoiceRequest request)
         {
-            foreach (Invoice item in invoices)
+            _data.invoiceCounter++;
+
+            Contract _contract = null;
+
+            foreach (Contract item in _data.contracts)
             {
-                if (item.invoiceId == _invoiceId)
+                if (item.Id == request.ContractId)
                 {
-                    return;
+                    _contract = item;
+                    break;
                 }
             }
 
-            invoices.Add(new Invoice { invoiceId = _invoiceId });
+            if (_contract != null)
+            {
+                var newInvoice = new Invoice { Id = _data.invoiceCounter, Contract = _contract };
+
+                var hours = (newInvoice.Contract.Job.End.ToUnixTimeSeconds() - newInvoice.Contract.Job.Start.ToUnixTimeSeconds()) / 3600;
+                newInvoice.Price = hours * newInvoice.Contract.Job.PricePerHour;
+
+                _data.invoices.Add(newInvoice);
+            }
         }
 
-        public void DeleteInvoice(long _invoiceId)
+        public void DeleteInvoice(DeleteInvoiceRequest request)
         {
-            foreach (Invoice item in invoices)
+            foreach (Invoice item in _data.invoices)
             {
-                if (item.invoiceId == _invoiceId)
+                if (item.Id == request.Id)
                 {
-                    invoices.Remove(item);
+                    _data.invoices.Remove(item);
                     break;
                 }
             }
@@ -46,19 +60,20 @@ namespace Lesson_2.Repositories
 
         public List<Invoice> GetAllInvoices()
         {
-            return invoices;
+            return _data.invoices;
         }
 
-        public void PutContractToInvoice(long _invoiceId, long _contractId)
+        public Invoice GetInvoiceById(GetInvoiceByIdRequest request)
         {
-            foreach (Invoice item in invoices)
+            foreach (Invoice invoice in _data.invoices)
             {
-                if (item.invoiceId == _invoiceId)
+                if (invoice.Id == request.Id)
                 {
-                    item.contract = _contractId;
-                    break;
+                    return invoice;
                 }
             }
+
+            return null;
         }
     }
 }

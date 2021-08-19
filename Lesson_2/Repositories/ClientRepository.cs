@@ -1,44 +1,38 @@
 ﻿using System.Collections.Generic;
 using Lesson_2.Models;
+using Lesson_2.Requests;
 
 namespace Lesson_2.Repositories
 {
     public interface IClientRepository
     {
-        void CreateClient(long _clientId);
-        void DeleteClient(long _clientId);
-        void PutInvoiceToClient(long _clientId, long _incvoiceId);
+        void CreateClient(CreateClientRequest request);
+        void DeleteClient(DeleteClientRequest request);
         List<Client> GetAllClients();
+        Client GetClientById(GetClientByIdRequest request);
     }
     public class ClientRepository : IClientRepository
     {
-        List<Client> clients;
+        IDataRepository _data;
 
-        public ClientRepository()
+        public ClientRepository(IDataRepository data)
         {
-            clients = new List<Client>();
+            _data = data;
         }
 
-        public void CreateClient(long _clientId)
+        public void CreateClient(CreateClientRequest request)
         {
-            foreach (Client item in clients)
-            {
-                if (item.clientId == _clientId)
-                {
-                    return;
-                }
-            }
-
-            clients.Add(new Client { clientId = _clientId });
+            _data.clientCounter++;
+            _data.clients.Add(new Client { Id = _data.clientCounter, Name = request.Name });
         }
 
-        public void DeleteClient(long _clientId)
+        public void DeleteClient(DeleteClientRequest request)
         {
-            foreach (Client item in clients)
+            foreach (Client item in _data.clients)
             {
-                if (item.clientId == _clientId)
+                if (item.Id == request.Id)
                 {
-                    clients.Remove(item);
+                    _data.clients.Remove(item);
                     break;
                 }
             }
@@ -46,19 +40,20 @@ namespace Lesson_2.Repositories
 
         public List<Client> GetAllClients()
         {
-            return clients;
+            return _data.clients;
         }
 
-        public void PutInvoiceToClient(long _clientId, long _incvoiceId)
+        public Client GetClientById(GetClientByIdRequest request)
         {
-            foreach (Client item in clients)
+            foreach (Client client in _data.clients)
             {
-                if (item.clientId == _clientId)
+                if (client.Id == request.Id)
                 {
-                    item.invoice = _incvoiceId;
-                    break;
+                    return client;
                 }
             }
+
+            return null;
         }
     }
 }
