@@ -12,6 +12,7 @@ using Lesson_2.Repositories;
 using Microsoft.OpenApi.Models;
 using System.IO;
 using System.Reflection;
+using AutoMapper;
 
 namespace Lesson_2
 {
@@ -27,10 +28,16 @@ namespace Lesson_2
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSingleton<IDataRepository, DataRepository>();
+            services.AddSingleton<IJobRepository, JobRepository>();
             services.AddSingleton<IClientRepository, ClientRepository>();
             services.AddSingleton<IContractRepository, ContractRepository>();
             services.AddSingleton<IEmployeeRepository, EmployeeRepository>();
             services.AddSingleton<IInvoiceRepository, InvoiceRepository>();
+
+            var mapperConfiguration = new MapperConfiguration(mp => mp.AddProfile(new MapperProfile()));
+            var mapper = mapperConfiguration.CreateMapper();
+            services.AddSingleton(mapper);
 
             services.AddSwaggerGen(c =>
             {

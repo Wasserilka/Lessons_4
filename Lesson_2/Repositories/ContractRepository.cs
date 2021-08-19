@@ -1,44 +1,63 @@
 ﻿using System.Collections.Generic;
 using Lesson_2.Models;
+using Lesson_2.Requests;
 
 namespace Lesson_2.Repositories
 {
     public interface IContractRepository
     {
-        void CreateContract(long _contractId);
-        void DeleteContract(long _contractId);
-        void PutEmployeeToContract(long _contractId, long _employeeId);
+        void CreateContract(CreateContractRequest request);
+        void DeleteContract(DeleteContractRequest request);
         List<Contract> GetAllContracts();
+        Contract GetContractById(GetContractByIdRequest request);
     }
     public class ContractRepository : IContractRepository
     {
-        List<Contract> contracts;
+        IDataRepository _data;
 
-        public ContractRepository()
+        public ContractRepository(IDataRepository data)
         {
-            contracts = new List<Contract>();
+            _data = data;
         }
 
-        public void CreateContract(long _contractId)
+        public void CreateContract(CreateContractRequest request)
         {
-            foreach (Contract item in contracts)
+            _data.contractCounter++;
+
+            Job _job = null;
+            Client _client = null;
+
+            foreach (Job item in _data.jobs)
             {
-                if (item.contractId == _contractId)
+                if (item.Id == request.JobId)
                 {
-                    return;
+                    _job = item;
+                    break;
                 }
             }
 
-            contracts.Add(new Contract { contractId = _contractId });
+            foreach (Client item in _data.clients)
+            {
+                if (item.Id == request.ClientId)
+                {
+                    _client = item;
+                    break;
+                }
+            }
+
+            if (_job != null && _client != null)
+            {
+                _data.contracts.Add(new Contract { Id = _data.contractCounter, Client = _client, Job = _job });
+            }
         }
 
-        public void DeleteContract(long _contractId)
+        public void DeleteContract(DeleteContractRequest request)
         {
-            foreach (Contract item in contracts)
+            foreach (Contract item in _data.contracts)
             {
-                if (item.contractId == _contractId)
+                if (item.Id == request.Id)
                 {
-                    contracts.Remove(item);
+                    _data.contracts.Remove(item);
                     break;
                 }
             }
@@ -46,19 +65,20 @@ namespace Lesson_2.Repositories
 
         public List<Contract> GetAllContracts()
         {
-            return contracts;
+            return _data.contracts;
         }
 
-        public void PutEmployeeToContract(long _contractId, long _employeeId)
+        public Contract GetContractById(GetContractByIdRequest request)
         {
-            foreach (Contract item in contracts)
+            foreach (Contract contract in _data.contracts)
             {
-                if (item.contractId == _contractId && !item.employees.Contains(_employeeId))
+                if (contract.Id == request.Id)
                 {
-                    item.employees.Add(_employeeId);
-                    break;
+                    return contract;
                 }
             }
+
+            return null;
         }
     }
 }

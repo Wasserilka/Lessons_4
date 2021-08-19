@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Lesson_2.Repositories;
-
+using Lesson_2.Requests;
+using Lesson_2.Responses;
+using Lesson_2.Models;
+using System.Collections.Generic;
+using AutoMapper;
 
 namespace Lesson_2.Controllers
 {
@@ -9,36 +13,55 @@ namespace Lesson_2.Controllers
     public class ClientController : ControllerBase
     {
         private IClientRepository _repository;
-        public ClientController(IClientRepository repository)
+        private IMapper _mapper;
+        public ClientController(IClientRepository repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
-        [HttpGet("get")]
-        public IActionResult Get()
+        [HttpGet("get/all")]
+        public IActionResult GetAllClients()
         {
             var clients = _repository.GetAllClients();
-            return Ok(clients);
+            var response = new GetAllClientsResponse()
+            {
+                Clients = new List<ClientDto>()
+            };
+
+            foreach (Client client in clients)
+            {
+                response.Clients.Add(_mapper.Map<ClientDto>(client));
+            }
+
+            return Ok(response);
         }
 
-        [HttpPost("create/{clientId}")]
-        public IActionResult Post([FromRoute] long clientId)
+        [HttpGet("get/{id}")]
+        public IActionResult GetClientById([FromRoute] long id)
         {
-            _repository.CreateClient(clientId);
+            var request = new GetClientByIdRequest { Id = id };
+            var client = _repository.GetClientById(request);
+            var response = new GetClientByIdResponse();
+
+            response.Client = _mapper.Map<ClientDto>(client);
+
+            return Ok(response);
+        }
+
+        [HttpPost("create/{name}")]
+        public IActionResult Post([FromRoute] string name)
+        {
+            var request = new CreateClientRequest { Name = name };
+            _repository.CreateClient(request);
             return Ok();
         }
 
-        [HttpDelete("delete/{clientId}")]
-        public IActionResult Delete([FromRoute] long clientId)
+        [HttpDelete("delete/{id}")]
+        public IActionResult Delete([FromRoute] long id)
         {
-            _repository.DeleteClient(clientId);
-            return Ok();
-        }
-
-        [HttpPut("put/{clientId}/invoice/{invoiceId}")]
-        public IActionResult PutInvoice([FromRoute] long clientId, [FromRoute] long invoiceId)
-        {
-            _repository.PutInvoiceToClient(clientId, invoiceId);
+            var request = new DeleteClientRequest { Id = id };
+            _repository.DeleteClient(request);
             return Ok();
         }
     }
