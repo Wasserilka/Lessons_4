@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Lesson_2
+namespace Timesheets
 {
     public class Program
     {

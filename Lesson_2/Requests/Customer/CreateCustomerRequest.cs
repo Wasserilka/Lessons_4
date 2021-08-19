@@ -1,8 +1,7 @@
 ﻿namespace Timesheets.Requests
 {
-    public class CreateContractRequest
+    public class CreateCustomerRequest
     {
-        public long CustomerId { get; set; }
         public string Name { get; set; }
     }
 }

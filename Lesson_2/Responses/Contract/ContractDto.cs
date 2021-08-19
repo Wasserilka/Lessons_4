@@ -1,11 +1,9 @@
-﻿using Lesson_2.Models;
-
-namespace Lesson_2.Responses
+﻿namespace Timesheets.Responses
 {
     public class ContractDto
     {
         public long Id { get; set; }
-        public Job Job { get; set; }
-        public Client Client { get; set; }
+        public string Name { get; set; }
+        public long CustomerId { get; set; }
     }
 }

@@ -8,13 +8,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Lesson_2.Repositories;
+using Timesheets.Repositories;
 using Microsoft.OpenApi.Models;
 using System.IO;
 using System.Reflection;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
-namespace Lesson_2
+namespace Timesheets
 {
     public class Startup
     {
@@ -27,13 +28,16 @@ namespace Lesson_2
 
         public void ConfigureServices(IServiceCollection services)
         {
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<TimesheetsDbContext>(options =>
+                options.UseNpgsql(connection));
+
             services.AddControllers();
-            services.AddSingleton<IDataRepository, DataRepository>();
-            services.AddSingleton<IJobRepository, JobRepository>();
-            services.AddSingleton<IClientRepository, ClientRepository>();
-            services.AddSingleton<IContractRepository, ContractRepository>();
-            services.AddSingleton<IEmployeeRepository, EmployeeRepository>();
-            services.AddSingleton<IInvoiceRepository, InvoiceRepository>();
+            services.AddScoped<ITaskRepository, TaskRepository>();
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<IContractRepository, ContractRepository>();
+            services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 
             var mapperConfiguration = new MapperConfiguration(mp => mp.AddProfile(new MapperProfile()));
             var mapper = mapperConfiguration.CreateMapper();

@@ -1,76 +1,113 @@
 ﻿using System.Collections.Generic;
-using Lesson_2.Models;
-using Lesson_2.Requests;
+using Timesheets.Requests;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using Model = Timesheets.Models;
+using System;
 
-namespace Lesson_2.Repositories
+namespace Timesheets.Repositories
 {
     public interface IInvoiceRepository
     {
-        void CreateInvoice(CreateInvoiceRequest request);
-        void DeleteInvoice(DeleteInvoiceRequest request);
-        List<Invoice> GetAllInvoices();
-        Invoice GetInvoiceById(GetInvoiceByIdRequest request);
+        Task Create(CreateInvoiceRequest request);
+        Task Delete(DeleteInvoiceRequest request);
+        Task<List<Model.Invoice>> GetAll();
+        Task<Model.Invoice> GetById(GetInvoiceByIdRequest request);
     }
     public class InvoiceRepository : IInvoiceRepository
     {
-        IDataRepository _data;
+        TimesheetsDbContext _context;
 
-        public InvoiceRepository(IDataRepository data)
+        public InvoiceRepository(TimesheetsDbContext context)
         {
-            _data = data;
+            _context = context;
         }
 
-        public void CreateInvoice(CreateInvoiceRequest request)
+        public async Task Create(CreateInvoiceRequest request)
         {
-            _data.invoiceCounter++;
-
-            Contract _contract = null;
-
-            foreach (Contract item in _data.contracts)
+            try
             {
-                if (item.Id == request.ContractId)
+                var lastItem = await _context
+                    .Invoices
+                    .OrderBy(x => x.Id)
+                    .LastOrDefaultAsync();
+                var id = lastItem != null ? lastItem.Id + 1 : 1;
+
+                var contract = await _context
+                    .Contracts
+                    .Where(x => x.Id == request.ContractId)
+                    .SingleOrDefaultAsync();
+                var task = await _context
+                    .Tasks
+                    .Where(x => x.Id == request.TasktId)
+                    .SingleOrDefaultAsync();
+
+                if (task.IsClosed == false)
                 {
-                    _contract = item;
-                    break;
+                    throw new Exception();
                 }
+
+                var cost = (decimal)((task.End - task.Start).TotalSeconds / 3600) * task.PricePerHour;
+                var item = new Model.Invoice { Id = id, Contract = contract, Cost = cost };
+
+                await _context.Invoices.AddAsync(item);
+                await _context.SaveChangesAsync();
             }
-
-            if (_contract != null)
+            catch (Exception)
             {
-                var newInvoice = new Invoice { Id = _data.invoiceCounter, Contract = _contract };
 
-                var hours = (newInvoice.Contract.Job.End.ToUnixTimeSeconds() - newInvoice.Contract.Job.Start.ToUnixTimeSeconds()) / 3600;
-                newInvoice.Price = hours * newInvoice.Contract.Job.PricePerHour;
-
-                _data.invoices.Add(newInvoice);
-            }
-        }
-
-        public void DeleteInvoice(DeleteInvoiceRequest request)
-        {
-            foreach (Invoice item in _data.invoices)
-            {
-                if (item.Id == request.Id)
-                {
-                    _data.invoices.Remove(item);
-                    break;
-                }
             }
         }
 
-        public List<Invoice> GetAllInvoices()
+        public async Task Delete(DeleteInvoiceRequest request)
         {
-            return _data.invoices;
+            try
+            {
+                var item = await _context
+                    .Invoices
+                    .Where(x => x.Id == request.Id)
+                    .SingleOrDefaultAsync();
+
+                _context.Invoices.Remove(item);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+
+            }
         }
 
-        public Invoice GetInvoiceById(GetInvoiceByIdRequest request)
+        public async Task<List<Model.Invoice>> GetAll()
         {
-            foreach (Invoice invoice in _data.invoices)
+            try
             {
-                if (invoice.Id == request.Id)
-                {
-                    return invoice;
-                }
+                return await _context
+                    .Invoices
+                    .Include(x => x.Contract)
+                    .ToListAsync();
+            }
+            catch (Exception)
+            {
+
+            }
+
+            return null;
+        }
+
+        public async Task<Model.Invoice> GetById(GetInvoiceByIdRequest request)
+        {
+            try
+            {
+                return await _context
+                    .Invoices
+                    .Where(x => x.Id == request.Id)
+                    .Include(x => x.Contract)
+                    .SingleOrDefaultAsync();
+            }
+            catch (Exception)
+            {
+
             }
 
             return null;

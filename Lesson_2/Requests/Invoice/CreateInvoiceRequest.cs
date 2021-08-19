@@ -1,7 +1,9 @@
-﻿namespace Lesson_2.Requests
+﻿namespace Timesheets.Requests
 {
     public class CreateInvoiceRequest
     {
         public long ContractId { get; set; }
+
+        public long TasktId { get; set; }
     }
 }

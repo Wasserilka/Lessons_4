@@ -1,56 +1,93 @@
 ﻿using System.Collections.Generic;
-using Lesson_2.Models;
-using Lesson_2.Requests;
+using Timesheets.Requests;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using Model = Timesheets.Models;
+using System;
 
-namespace Lesson_2.Repositories
+namespace Timesheets.Repositories
 {
     public interface IEmployeeRepository
     {
-        void CreateEmployee(CreateEmployeeRequest request);
-        void DeleteEmployee(DeleteEmployeeRequest request);
-        List<Employee> GetAllEmployees();
-        Employee GetEmployeeById(GetEmployeeByIdRequest request);
+        Task Create(CreateEmployeeRequest request);
+        Task Delete(DeleteEmployeeRequest request);
+        Task<List<Model.Employee>> GetAll();
+        Task<Model.Employee> GetById(GetEmployeeByIdRequest request);
     }
     public class EmployeeRepository : IEmployeeRepository
     {
-        IDataRepository _data;
+        TimesheetsDbContext _context;
 
-        public EmployeeRepository(IDataRepository data)
+        public EmployeeRepository(TimesheetsDbContext context)
         {
-            _data = data;
+            _context = context;
         }
 
-        public void CreateEmployee(CreateEmployeeRequest request)
+        public async Task Create(CreateEmployeeRequest request)
         {
-            _data.employeeCounter++;
-            _data.employees.Add(new Employee { Id = _data.employeeCounter, Name = request.Name });
-        }
-
-        public void DeleteEmployee(DeleteEmployeeRequest request)
-        {
-            foreach (Employee item in _data.employees)
+            try
             {
-                if (item.Id == request.Id)
-                {
-                    _data.employees.Remove(item);
-                    break;
-                }
+                var lastItem = await _context
+                    .Employees
+                    .OrderBy(x => x.Id)
+                    .LastOrDefaultAsync();
+                var id = lastItem != null ? lastItem.Id + 1 : 1;
+                var item = new Model.Employee { Id = id, Name = request.Name };
+
+                await _context.Employees.AddAsync(item);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+
             }
         }
 
-        public List<Employee> GetAllEmployees()
+        public async Task Delete(DeleteEmployeeRequest request)
         {
-            return _data.employees;
+            try
+            {
+                var item = await _context
+                    .Employees
+                    .Where(x => x.Id == request.Id)
+                    .SingleOrDefaultAsync();
+
+                _context.Employees.Remove(item);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+
+            }
         }
 
-        public Employee GetEmployeeById(GetEmployeeByIdRequest request)
+        public async Task<List<Model.Employee>> GetAll()
         {
-            foreach (Employee employee in _data.employees)
+            try
             {
-                if(employee.Id == request.Id)
-                {
-                    return employee;
-                }
+                return await _context.Employees.ToListAsync();
+            }
+            catch (Exception)
+            {
+
+            }
+
+            return null;
+        }
+
+        public async Task<Model.Employee> GetById(GetEmployeeByIdRequest request)
+        {
+            try
+            {
+                return await _context
+                    .Employees
+                    .Where(x => x.Id == request.Id)
+                    .SingleOrDefaultAsync();
+            }
+            catch (Exception)
+            {
+
             }
 
             return null;

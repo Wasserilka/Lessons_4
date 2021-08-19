@@ -1,11 +1,11 @@
-﻿using Lesson_2.Models;
+﻿using Timesheets.Models;
 
-namespace Lesson_2.Responses
+namespace Timesheets.Responses
 {
     public class InvoiceDto
     {
         public long Id { get; set; }
         public Contract Contract { get; set; }
-        public double Price { get; set; }
+        public decimal Cost { get; set; }
     }
 }

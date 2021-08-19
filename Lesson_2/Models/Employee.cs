@@ -1,4 +1,4 @@
-﻿namespace Lesson_2.Models
+﻿namespace Timesheets.Models
 {
     public class Employee
     {
