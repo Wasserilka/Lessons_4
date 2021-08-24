@@ -1,16 +1,16 @@
 ﻿using AutoMapper;
-using Lesson_2.Responses;
-using Lesson_2.Models;
+using Timesheets.Responses;
+using Timesheets.Models;
 
-namespace Lesson_2
+namespace Timesheets
 {
     public class MapperProfile : Profile
     {
         public MapperProfile()
         {
             CreateMap<Employee, EmployeeDto>();
-            CreateMap<Job, JobDto>();
-            CreateMap<Client, ClientDto>();
+            CreateMap<Task, TaskDto>();
+            CreateMap<Customer, CustomerDto>();
             CreateMap<Contract, ContractDto>();
             CreateMap<Invoice, InvoiceDto>();
         }

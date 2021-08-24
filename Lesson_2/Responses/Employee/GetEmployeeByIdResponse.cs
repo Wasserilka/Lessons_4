@@ -1,4 +1,4 @@
-﻿namespace Lesson_2.Responses
+﻿namespace Timesheets.Responses
 {
     public class GetEmployeeByIdResponse
     {

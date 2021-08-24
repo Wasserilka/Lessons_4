@@ -1,4 +1,4 @@
-﻿namespace Lesson_2.Requests
+﻿namespace Timesheets.Requests
 {
     public class GetEmployeeByIdRequest
     {

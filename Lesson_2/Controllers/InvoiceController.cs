@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Lesson_2.Repositories;
-using Lesson_2.Requests;
-using Lesson_2.Responses;
-using Lesson_2.Models;
+using Timesheets.Repositories;
+using Timesheets.Requests;
+using Timesheets.Responses;
+using Timesheets.Models;
 using System.Collections.Generic;
 using AutoMapper;
+using System.Threading.Tasks;
 
-namespace Lesson_2.Controllers
+namespace Timesheets.Controllers
 {
     [Route("api/invoice")]
     [ApiController]
@@ -21,9 +22,9 @@ namespace Lesson_2.Controllers
         }
 
         [HttpGet("get/all")]
-        public IActionResult GetAllInvoices()
+        public async Task<IActionResult> GetAll()
         {
-            var invoices = _repository.GetAllInvoices();
+            var invoices = await _repository.GetAll();
             var response = new GetAllInvoicesResponse()
             {
                 Invoices = new List<InvoiceDto>()
@@ -38,10 +39,10 @@ namespace Lesson_2.Controllers
         }
 
         [HttpGet("get/{id}")]
-        public IActionResult GetInvoiceById([FromRoute] long id)
+        public async Task<IActionResult> GetInvoiceById([FromRoute] long id)
         {
             var request = new GetInvoiceByIdRequest { Id = id };
-            var invoice = _repository.GetInvoiceById(request);
+            var invoice = await _repository.GetById(request);
             var response = new GetInvoiceByIdResponse();
 
             response.Invoice = _mapper.Map<InvoiceDto>(invoice);
@@ -49,19 +50,19 @@ namespace Lesson_2.Controllers
             return Ok(response);
         }
 
-        [HttpPost("create")]
-        public IActionResult CreateInvoice([FromQuery] long contractId)
+        [HttpPost("create/contract/{contractId}/task/{taskId}")]
+        public async Task<IActionResult> CreateInvoice([FromRoute] long contractId, [FromRoute] long taskId)
         {
-            var request = new CreateInvoiceRequest { ContractId = contractId };
-            _repository.CreateInvoice(request);
+            var request = new CreateInvoiceRequest { ContractId = contractId, TasktId = taskId};
+            await _repository.Create(request);
             return Ok();
         }
 
         [HttpDelete("delete/{id}")]
-        public IActionResult DeleteInvoice([FromRoute] long id)
+        public async Task<IActionResult> DeleteInvoice([FromRoute] long id)
         {
             var request = new DeleteInvoiceRequest { Id = id };
-            _repository.DeleteInvoice(request);
+            await _repository.Delete(request);
             return Ok();
         }
     }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Lesson_2.Responses
+namespace Timesheets.Responses
 {
     public class GetAllEmployeesResponse
     {

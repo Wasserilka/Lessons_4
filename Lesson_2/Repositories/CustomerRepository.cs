@@ -8,34 +8,34 @@ using System;
 
 namespace Timesheets.Repositories
 {
-    public interface IContractRepository
+    public interface ICustomerRepository
     {
-        Task Create(CreateContractRequest request);
-        Task Delete(DeleteContractRequest request);
-        Task<List<Model.Contract>> GetAll(GetAllContractsRequest request);
-        Task<Model.Contract> GetById(GetContractByIdRequest request);
+        Task Create(CreateCustomerRequest request);
+        Task Delete(DeleteCustomerRequest request);
+        Task<List<Model.Customer>> GetAll();
+        Task<Model.Customer> GetById(GetCustomerByIdRequest request);
     }
-    public class ContractRepository : IContractRepository
+    public class CustomerRepository : ICustomerRepository
     {
         TimesheetsDbContext _context;
 
-        public ContractRepository(TimesheetsDbContext context)
+        public CustomerRepository(TimesheetsDbContext context)
         {
             _context = context;
         }
 
-        public async Task Create(CreateContractRequest request)
+        public async Task Create(CreateCustomerRequest request)
         {
             try
             {
                 var lastItem = await _context
-                    .Contracts
+                    .Customers
                     .OrderBy(x => x.Id)
                     .LastOrDefaultAsync();
                 var id = lastItem != null ? lastItem.Id + 1 : 1;
-                var item = new Model.Contract { Id = id, CustomerId = request.CustomerId, Name = request.Name };
+                var item = new Model.Customer { Id = id, Name = request.Name };
 
-                await _context.Contracts.AddAsync(item);
+                await _context.Customers.AddAsync(item);
                 await _context.SaveChangesAsync();
             }
             catch (Exception)
@@ -44,16 +44,16 @@ namespace Timesheets.Repositories
             }
         }
 
-        public async Task Delete(DeleteContractRequest request)
+        public async Task Delete(DeleteCustomerRequest request)
         {
             try
             {
                 var item = await _context
-                    .Contracts
-                    .Where(x => x.CustomerId == request.CustomerId && x.Id == request.Id)
+                    .Customers
+                    .Where(x => x.Id == request.Id)
                     .SingleOrDefaultAsync();
 
-                _context.Contracts.Remove(item);
+                _context.Customers.Remove(item);
                 await _context.SaveChangesAsync();
             }
             catch (Exception)
@@ -62,13 +62,13 @@ namespace Timesheets.Repositories
             }
         }
 
-        public async Task<List<Model.Contract>> GetAll(GetAllContractsRequest request)
+        public async Task<List<Model.Customer>> GetAll()
         {
             try
             {
                 return await _context
-                    .Contracts
-                    .Where(x => x.CustomerId == request.CustomerId)
+                    .Customers
+                    .Include(x => x.Contracts)
                     .ToListAsync();
             }
             catch (Exception)
@@ -79,13 +79,14 @@ namespace Timesheets.Repositories
             return null;
         }
 
-        public async Task<Model.Contract> GetById(GetContractByIdRequest request)
+        public async Task<Model.Customer> GetById(GetCustomerByIdRequest request)
         {
             try
             {
                 return await _context
-                    .Contracts
-                    .Where(x => x.CustomerId == request.CustomerId && x.Id == request.Id)
+                    .Customers
+                    .Where(x => x.Id == request.Id)
+                    .Include(x => x.Contracts)
                     .SingleOrDefaultAsync();
             }
             catch (Exception)

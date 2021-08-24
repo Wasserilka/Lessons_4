@@ -1,6 +1,6 @@
 ﻿namespace Timesheets.Requests
 {
-    public class DeleteInvoiceRequest
+    public class DeleteTaskRequest
     {
         public long Id { get; set; }
     }
