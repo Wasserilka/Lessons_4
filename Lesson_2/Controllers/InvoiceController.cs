@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using AutoMapper;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Timesheets.Validation;
+using Timesheets.Validation.Requests;
 
 namespace Timesheets.Controllers
 {
@@ -17,10 +19,21 @@ namespace Timesheets.Controllers
     {
         private IInvoiceRepository _repository;
         private IMapper _mapper;
-        public InvoiceController(IInvoiceRepository repository, IMapper mapper)
+        private IGetInvoiceByIdValidator _getInvoiceByIdValidator;
+        private ICreateInvoiceValidator _createInvoiceValidator;
+        private IDeleteInvoiceValidator _deleteInvoiceValidator;
+        public InvoiceController(
+            IInvoiceRepository repository, 
+            IMapper mapper,
+            IGetInvoiceByIdValidator getInvoiceByIdValidator,
+            ICreateInvoiceValidator createInvoiceValidator,
+            IDeleteInvoiceValidator deleteInvoiceValidator)
         {
             _repository = repository;
             _mapper = mapper;
+            _getInvoiceByIdValidator = getInvoiceByIdValidator;
+            _createInvoiceValidator = createInvoiceValidator;
+            _deleteInvoiceValidator = deleteInvoiceValidator;
         }
 
         [HttpGet("get/all")]
@@ -44,6 +57,13 @@ namespace Timesheets.Controllers
         public async Task<IActionResult> GetInvoiceById([FromRoute] long id)
         {
             var request = new GetInvoiceByIdRequest { Id = id };
+            var validation = new OperationResult<GetInvoiceByIdRequest>(_getInvoiceByIdValidator.ValidateEntity(request));
+
+            if (!validation.Succeed)
+            {
+                return BadRequest(validation);
+            }
+
             var invoice = await _repository.GetById(request);
             var response = new GetInvoiceByIdResponse();
 
@@ -55,7 +75,14 @@ namespace Timesheets.Controllers
         [HttpPost("create/contract/{contractId}/task/{taskId}")]
         public async Task<IActionResult> CreateInvoice([FromRoute] long contractId, [FromRoute] long taskId)
         {
-            var request = new CreateInvoiceRequest { ContractId = contractId, TasktId = taskId};
+            var request = new CreateInvoiceRequest { ContractId = contractId, TaskId = taskId};
+            var validation = new OperationResult<CreateInvoiceRequest>(_createInvoiceValidator.ValidateEntity(request));
+
+            if (!validation.Succeed)
+            {
+                return BadRequest(validation);
+            }
+
             await _repository.Create(request);
             return Ok();
         }
@@ -64,6 +91,13 @@ namespace Timesheets.Controllers
         public async Task<IActionResult> DeleteInvoice([FromRoute] long id)
         {
             var request = new DeleteInvoiceRequest { Id = id };
+            var validation = new OperationResult<DeleteInvoiceRequest>(_deleteInvoiceValidator.ValidateEntity(request));
+
+            if (!validation.Succeed)
+            {
+                return BadRequest(validation);
+            }
+
             await _repository.Delete(request);
             return Ok();
         }

@@ -1,23 +1,19 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Timesheets.Repositories;
 using Microsoft.OpenApi.Models;
-using System.IO;
 using System.Text;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Timesheets.Security;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using FluentValidation.AspNetCore;
+using Timesheets.Validation.Requests;
 
 namespace Timesheets
 {
@@ -59,12 +55,35 @@ namespace Timesheets
                     };
                 });
 
-
             services.AddScoped<ITaskRepository, TaskRepository>();
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<IContractRepository, ContractRepository>();
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
             services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+
+            services.AddScoped<IGetContractByIdValidator, GetContractByIdValidator>();
+            services.AddScoped<IGetAllContractsValidator, GetAllContractsValidator>();
+            services.AddScoped<ICreateContractValidator, CreateContractValidator>();
+            services.AddScoped<IDeleteContractValidator, DeleteContractValidator>();
+
+            services.AddScoped<IGetCustomerByIdValidator, GetCustomerByIdValidator>();
+            services.AddScoped<ICreateCustomerValidator, CreateCustomerValidator>();
+            services.AddScoped<IDeleteCustomerValidator, DeleteCustomerValidator>();
+
+            services.AddScoped<IGetEmployeeByIdValidator, GetEmployeeByIdValidator>();
+            services.AddScoped<ICreateEmployeeValidator, CreateEmployeeValidator>();
+            services.AddScoped<IDeleteEmployeeValidator, DeleteEmployeeValidator>();
+
+            services.AddScoped<IGetInvoiceByIdValidator, GetInvoiceByIdValidator>();
+            services.AddScoped<ICreateInvoiceValidator, CreateInvoiceValidator>();
+            services.AddScoped<IDeleteInvoiceValidator, DeleteInvoiceValidator>();
+
+            services.AddScoped<IGetTaskByIdValidator, GetTaskByIdValidator>();
+            services.AddScoped<ICreateTaskValidator, CreateTaskValidator>();
+            services.AddScoped<IDeleteTaskValidator, DeleteTaskValidator>();
+            services.AddScoped<IAddEmployeeToTaskValidator, AddEmployeeToTaskValidator>();
+            services.AddScoped<IRemoveEmployeeFromTaskValidator, RemoveEmployeeFromTaskValidator>();
+            services.AddScoped<ICloseTaskValidator, CloseTaskValidator>();
 
             var mapperConfiguration = new MapperConfiguration(mp => mp.AddProfile(new MapperProfile()));
             var mapper = mapperConfiguration.CreateMapper();

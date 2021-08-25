@@ -2,7 +2,7 @@
 {
     public class CreateContractRequest
     {
-        public long CustomerId { get; set; }
-        public string Name { get; set; }
+        public new long CustomerId { get; set; }
+        public new string Name { get; set; }
     }
 }
