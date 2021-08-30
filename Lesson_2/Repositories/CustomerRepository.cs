@@ -33,7 +33,8 @@ namespace Timesheets.Repositories
                     .OrderBy(x => x.Id)
                     .LastOrDefaultAsync();
                 var id = lastItem != null ? lastItem.Id + 1 : 1;
-                var item = new Model.Customer { Id = id, Name = request.Name };
+                var factory = new Model.CustomerFactory();
+                var item = factory.Create(id, request.Name);
 
                 await _context.Customers.AddAsync(item);
                 await _context.SaveChangesAsync();

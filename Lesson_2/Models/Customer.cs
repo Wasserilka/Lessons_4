@@ -4,13 +4,37 @@ namespace Timesheets.Models
 {
     public class Customer
     {
-        public long Id { get; set; }
-        public string Name { get; set; }
-        public List<Contract> Contracts { get; set; }
+        private long _id;
+        private string _name;
+        private List<Contract> _contracts;
 
-        public Customer()
+        public long Id
         {
+            get => _id;
+            set => _id = value;
+        }
+        public string Name
+        {
+            get => _name;
+            set => _name = value;
+        }
+        public List<Contract> Contracts
+        {
+            get => _contracts;
+            set => _contracts = value;
+        }
+
+        internal Customer(long id, string name)
+        {
+            _id = id;
+            _name = name;
             Contracts = new List<Contract>();
         }
+
+        internal Customer() { }
+    }
+    public class CustomerFactory
+    {
+        public Customer Create(long id, string name) => new Customer(id, name);
     }
 }
