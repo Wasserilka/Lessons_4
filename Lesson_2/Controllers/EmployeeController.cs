@@ -6,10 +6,12 @@ using Model = Timesheets.Models;
 using System.Collections.Generic;
 using AutoMapper;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Timesheets.Controllers
 {
     [Route("api/employee")]
+    [Authorize]
     [ApiController]
     public class EmployeeController : ControllerBase
     {
