@@ -40,7 +40,7 @@ namespace Timesheets.Repositories
                     .SingleOrDefaultAsync();
                 var task = await _context
                     .Tasks
-                    .Where(x => x.Id == request.TasktId)
+                    .Where(x => x.Id == request.TaskId)
                     .SingleOrDefaultAsync();
 
                 if (task.IsClosed == false)
