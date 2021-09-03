@@ -36,7 +36,7 @@ namespace Timesheets.Repositories
                     .Where(x => x.Id == request.TaskId)
                     .SingleOrDefaultAsync();
 
-                item.Employees.Add(request.EmployeeId);
+                item.AddEmployee(request.EmployeeId);
                 await _context.SaveChangesAsync();
             }
             catch (Exception)
@@ -54,8 +54,7 @@ namespace Timesheets.Repositories
                     .Where(x => x.Id == request.Id)
                     .SingleOrDefaultAsync();
 
-                item.End = DateTime.UtcNow;
-                item.IsClosed = true;
+                item.Close();
                 await _context.SaveChangesAsync();
             }
             catch (Exception)
@@ -73,20 +72,15 @@ namespace Timesheets.Repositories
                     .OrderBy(x => x.Id)
                     .LastOrDefaultAsync();
                 var id = lastItem != null ? lastItem.Id + 1 : 1;
-                var item = new Model.Task
-                {
-                    Id = id,
-                    Start = DateTime.UtcNow,
-                    PricePerHour = request.PricePerHour,
-                    IsClosed = false
-                };
+                var factory = new Model.TaskFactory();
+                var item = factory.Create(id, request.PricePerHour);
 
                 await _context.Tasks.AddAsync(item);
                 await _context.SaveChangesAsync();
             }
             catch (Exception)
             {
-
+                
             }
         }
 
@@ -148,7 +142,7 @@ namespace Timesheets.Repositories
                     .Where(x => x.Id == request.TaskId)
                     .SingleOrDefaultAsync();
 
-                item.Employees.Remove(request.EmployeeId);
+                item.RemoveEmployee(request.EmployeeId);
                 await _context.SaveChangesAsync();
             }
             catch (Exception)

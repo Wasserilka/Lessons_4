@@ -43,13 +43,9 @@ namespace Timesheets.Repositories
                     .Where(x => x.Id == request.TaskId)
                     .SingleOrDefaultAsync();
 
-                if (task.IsClosed == false)
-                {
-                    throw new Exception();
-                }
-
-                var cost = (decimal)((task.End - task.Start).TotalSeconds / 3600) * task.PricePerHour;
-                var item = new Model.Invoice { Id = id, Contract = contract, Cost = cost };
+                var cost = task.GetCost();
+                var factory = new Model.InvoiceFactory();
+                var item = factory.Create(id, contract, cost);
 
                 await _context.Invoices.AddAsync(item);
                 await _context.SaveChangesAsync();
