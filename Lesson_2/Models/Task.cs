@@ -43,10 +43,10 @@ namespace Timesheets.Models
             set => _isClosed = value;
         }
 
-        internal Task(long id, decimal pricePerHour)
+        internal Task(long id, decimal pricePerHour, ICurrentTime time)
         {
             _id = id;
-            _start = DateTime.UtcNow;
+            _start = time.UtcNow();
             _pricePerHour = pricePerHour;
             Employees = new List<long>();
             _isClosed = false;
@@ -54,7 +54,7 @@ namespace Timesheets.Models
 
         internal Task() { }
 
-        public void Close()
+        public void Close(ICurrentTime time)
         {
             if (IsClosed)
             {
@@ -62,7 +62,7 @@ namespace Timesheets.Models
             }
 
             IsClosed = true;
-            End = DateTime.UtcNow;
+            End = time.UtcNow();
         }
 
         public decimal GetCost()
@@ -91,6 +91,6 @@ namespace Timesheets.Models
 
     public class TaskFactory
     {
-        public Task Create(long id, decimal pricePerHour) => new Task(id, pricePerHour);
+        public Task Create(long id, decimal pricePerHour, ICurrentTime time) => new Task(id, pricePerHour, time);
     }
 }
