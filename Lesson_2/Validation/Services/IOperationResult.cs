@@ -17,7 +17,7 @@ namespace Timesheets.Validation
 
         public OperationResult(IReadOnlyList<IOperationFailure> failures)
         {
-            Failures = failures;
+            Failures = failures == null ? new List<IOperationFailure>() : failures;
             Succeed = Failures.Count > 0 ? false : true;
         }
     }
