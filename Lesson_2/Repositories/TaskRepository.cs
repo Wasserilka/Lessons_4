@@ -54,7 +54,7 @@ namespace Timesheets.Repositories
                     .Where(x => x.Id == request.Id)
                     .SingleOrDefaultAsync();
 
-                item.Close();
+                item.Close(new Model.SystemTime());
                 await _context.SaveChangesAsync();
             }
             catch (Exception)
@@ -73,7 +73,7 @@ namespace Timesheets.Repositories
                     .LastOrDefaultAsync();
                 var id = lastItem != null ? lastItem.Id + 1 : 1;
                 var factory = new Model.TaskFactory();
-                var item = factory.Create(id, request.PricePerHour);
+                var item = factory.Create(id, request.PricePerHour, new Model.SystemTime());
 
                 await _context.Tasks.AddAsync(item);
                 await _context.SaveChangesAsync();
